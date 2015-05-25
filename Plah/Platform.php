@@ -54,7 +54,7 @@ class Platform extends Singleton
         self::$_items[$platform] = IniParser::getInstance()->parse($platform_default);
 
         //Parse local platform file and update/add keys of default platform
-        $platform_local = rtrim(Plah::getConfig('platform.dir'), '/') . '/' . Plah::getConfig('config.file.platform') . '.ini';
+        $platform_local = rtrim(Plah::getConfig('platform.dir'), '/') . '/' . Plah::getConfig('platform.file.local') . '.ini';
         self::$_items[$platform] = array_merge(self::$_items[$platform], IniParser::getInstance()->parse($platform_local));
 
         //Parse additional platform file and update/add keys of default platform
