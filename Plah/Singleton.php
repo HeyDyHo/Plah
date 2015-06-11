@@ -7,7 +7,7 @@ abstract class Singleton
     private static $_instances = array();  //Singleton instances, one per class
 
     /**
-     * Get a static instance of the class
+     * Get a static instance of the class.
      *
      * @return static
      */
