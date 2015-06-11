@@ -284,6 +284,16 @@ The `find()` function has some additional parameters for sorting and limiting th
     //Find users with the first name John, order the results descending by last name and limit the results to the first 10 matching entries
     $users = User::getInstance()->find(array('first_name' => 'John'), array(), array('last_name' => -1), 0, 10);
 
+In addition to sorting and limiting the results of `find()` you can get the number of found elements without
+and with the limits. This can be useful for pagers. Look at the example:
+
+    //Find users with the first name John, order the results descending by last name and limit the results to the first 10 matching entries
+    $count = 0;
+    $found = 0;
+    $users = User::getInstance()->find(array('first_name' => 'John'), array(), array('last_name' => -1), 0, 10, $count, $found);
+    echo $count;  //This will be the number of all elements with the first name John, maybe 0, 5, 10 or even 100
+    echo $found;  //This will be 10 or less because the result set is limited to max 10
+
 You can set some options for the MongoDB connection via the Plah class or a config file. Most of the options
 should be clear, mongodb.db is the database that is used for authentication if user and password are set.
 

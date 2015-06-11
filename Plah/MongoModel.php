@@ -133,9 +133,11 @@ abstract class MongoModel extends Singleton
      * @param array $sort
      * @param null|int $skip
      * @param null|int $limit
+     * @param int $count
+     * @param int $found
      * @return static[]
      */
-    public function find(array $query = array(), array $fields = array(), array $sort = array(), $skip = null, $limit = null)
+    public function find(array $query = array(), array $fields = array(), array $sort = array(), $skip = null, $limit = null, &$count = 0, &$found = 0)
     {
         $data = array();
 
@@ -150,6 +152,9 @@ abstract class MongoModel extends Singleton
         if (!is_null($limit)) {
             $result->limit((int)$limit);
         }
+
+        $count = $result->count();
+        $found = $result->count(true);
 
         foreach ($result as $rec) {
             $doc = new static();
