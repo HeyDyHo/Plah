@@ -15,15 +15,10 @@ class IniParser extends Singleton
         $data = array();
 
         if (is_file($file)) {
-            $fh = fopen($file, 'r');
-            while ($l = fgets($fh)) {
-                if (!preg_match('/^#/', $l)) {
-                    if (preg_match('/^(.*?)=(.*?)$/', $l, $found)) {
-                        $data[$found[1]] = $found[2];
-                    }
-                }
+            $data = parse_ini_file($file);
+            if ($data === false) {
+                $data = array();
             }
-            fclose($fh);
         }
 
         return $data;
