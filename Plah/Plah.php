@@ -17,7 +17,9 @@ class Plah
         'mongodb.port' => '',
         'mongodb.user' => '',
         'mongodb.password' => '',
-        'mongodb.db' => ''
+        'mongodb.db' => '',
+        'mongoautoincrement.db' => 'autoincrement',
+        'mongoautoincrement.collection' => 'autoincrement'
     );
 
     /**

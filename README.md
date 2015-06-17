@@ -43,7 +43,9 @@ The Plah class itsself is only a wrapper to initially setup some stuff. It's use
         'mongodb.port' => '',
         'mongodb.user' => '',
         'mongodb.password' => '',
-        'mongodb.db' => ''
+        'mongodb.db' => '',
+        'mongoautoincrement.db' => 'autoincrement',
+        'mongoautoincrement.collection' => 'autoincrement'
     ));
 
 Most of the time you will use this in your projects `index.php` file or some kind of init file/class.
@@ -302,6 +304,44 @@ should be clear, mongodb.db is the database that is used for authentication if u
     mongodb.user
     mongodb.password
     mongodb.db
+
+### MongoAutoIncrement
+The MongoAutoIncrement class can be used to get auto incremented IDs like SQL databases use them.
+MongoAutoIncrement needs a database and a collection, both default to `autoincrement` and can be changed
+by the Plah init process or via a config file. Internally a document with a specific key is created, every
+time you try to get the next auto incement value for this key a sequence number is incremented by one. Here
+is a short usage example:
+
+    echo \Plah\MongoAutoIncrement::getInstance()->get('user');  //1
+    echo \Plah\MongoAutoIncrement::getInstance()->get('user');  //2
+    echo \Plah\MongoAutoIncrement::getInstance()->get('user');  //3
+    
+    echo \Plah\MongoAutoIncrement::getInstance()->get('event');  //1
+    echo \Plah\MongoAutoIncrement::getInstance()->get('event');  //2
+    echo \Plah\MongoAutoIncrement::getInstance()->get('user');  //4
+    echo \Plah\MongoAutoIncrement::getInstance()->get('event');  //3
+    
+    //Another way
+    $auto_increment = new \Plah\MongoAutoIncrement();
+    echo $auto_increment->get('user');  //5
+    echo $auto_increment->get('event');  //4
+
+Optionally you can set an init value, to start the counter with this value in case this is the first request
+for the key:
+
+    echo \Plah\MongoAutoIncrement::getInstance()->get('user', 1000);  //1000
+    
+    echo \Plah\MongoAutoIncrement::getInstance()->get('event');  //1
+    echo \Plah\MongoAutoIncrement::getInstance()->get('event', 1000);  //2 <- Not the first request for 'event', the init value is ignored
+
+You should run the following line one time to create the necessary indexes for the collection.
+
+    \Plah\MongoAutoIncrement::ensureIndexes();
+
+**Settings:**
+
+    mongoautoincrement.db
+    mongoautoincrement.collection
 
 ### Session
 The Session class is a wrapper around the `$_SESSION` super global variable. You can use it to get, set
