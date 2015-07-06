@@ -370,9 +370,9 @@ The Pagination class does the necessary calculations to show a pagination and re
 numbers as an array. It needs four arguments: The total number of data, the number of entries per
 page, the currently active page and the desired number of pages in the pagination. The returned array
 will contain the first and the last page, previous and next page, pages to show, the active page,
-the number of entries on the active page and the total number of entries. Non of the numbers will
-be less than one to avoid division by zero problems. As well no numbers less than one or non-int will
-be accepted for the calculations. Here is an example:
+the number of entries on the active page, the total number of entries and the start and end data of
+the active page. Non of the numbers will be less than one to avoid division by zero problems. As well
+no numbers less than one or non-int will be accepted for the calculations. Here is an example:
 
     //Calculate a pagination
     $total = 5;
@@ -398,6 +398,8 @@ be accepted for the calculations. Here is an example:
         [active] => 1
         [entries] => 2
         [total] => 5
+        [start] => 1
+        [end] => 2
     )
 
 The example shows that even if 4 pages are desired the Pagination class calculates that only

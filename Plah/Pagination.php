@@ -31,7 +31,9 @@ class Pagination extends Singleton
             'pages' => array(1),
             'active' => 1,
             'entries' => 1,
-            'total' => 1
+            'total' => 1,
+            'start' => 1,
+            'end' => 1
         );
 
         $total = intval($total);
@@ -48,6 +50,8 @@ class Pagination extends Singleton
             $data['next'] = ($data['active'] < $data['last']) ? $data['active'] + 1 : $data['last'];
             $data['entries'] = ($data['active'] == $data['last']) ? $total - (($data['last'] - 1) * $entries) : $entries;
             $data['total'] = $total;
+            $data['start'] = (($data['active'] - 1) * $entries) + 1;
+            $data['end'] = (($data['active'] - 1) * $entries) + $data['entries'];
 
             //Calculate the pages, try to get the active page to the middle position
             $right_limit = $data['last'] - $data['active'];  //Max possible steps right from active page
