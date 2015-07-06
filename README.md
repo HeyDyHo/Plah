@@ -57,10 +57,10 @@ are used for the Config component.
 The Config class can be used to put config options to one single text file. The following format
 is used for a config file:
 
-    # Mailer settings
-    mail.host=mail.example.com
-    mail.user=myuser@example.com
-    mail.password=mypassword
+    ; Mailer settings
+    mail.host = "mail.example.com"
+    mail.user = "myuser@example.com"
+    mail.password = "mypassword"
 
 And this is the way how to get a config option:
 
@@ -94,13 +94,13 @@ project, one should be used for the english version, one for the german version,
 new (unconfigured) URLs should be english. You can have files like this:
 
     //platform-default.ini
-    language=en
+    language = "en"
     
     //myplatform.com.ini
-    language=en
+    language = "en"
     
     //myplatform.de.ini
-    language=de
+    language = "de"
 
 The code would look something like this:
 
@@ -124,10 +124,10 @@ This loads the `platform-default.ini` file, additionaly the `platform-local.ini`
 Another use case may be two different config files in parallel. This can be done like that:
 
     //myconfig1.ini
-    language=en
+    language = "en"
     
     //myconfig2.ini
-    language=de
+    language = "de"
     
     $config1 = new \Plah\Platform();
     $config2 = new \Plah\Platform();
@@ -141,19 +141,19 @@ specific settings at once via the global config file. For example to switch of a
 without having to change the setting in each platform config file.
 
     //myplatform1.ini
-    userupload=1
+    userupload = 1
     
     //myplatform2.ini
-    userupload=0
+    userupload = 0
     
     //myplatform3.ini
-    userupload=1
+    userupload = 1
     
     //The code to get the userupload setting would look like this
     \Plah\Config::getInstance()->get('userupload', \Plah\Platform::getInstance()->get('userupload'));
     
     //To switch of the userupload for all platforms just add it to your config-default.ini (not the platform-default.ini)
-    userupload=0
+    userupload = 0
 
 In this example the userupload setting is requested via the main config file, as fallback the platform config
 is used. This means as long as no userupload option is present in the main config file, the platform setting
@@ -173,10 +173,10 @@ Config and Platform classes, that's an alternative way to the well-known but som
 `Gettext` implementations that use pre-compiled files.
 
     //en.ini
-    main.hello=hello
+    main.hello = "hello"
     
     //de.ini
-    main.hello=hallo
+    main.hello = "hallo"
     
     \Plah\Language::getInstance()->set('en');
     echo \Plah\Language::getInstance()->get('main.hello');  //hello
