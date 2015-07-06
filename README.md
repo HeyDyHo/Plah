@@ -277,7 +277,7 @@ Here are some examples of how to use your models:
 
 The functions `findOne()`, `find()`, `save()` and `remove()` are wrappers around the functions with the same
 names provided by a `MongoCollection` object. `findOne()` returns `null` if nothing was found just like the
-original function and an instance of you models class if something was found. The original function returns
+original function and an instance of your model's class if something was found. The original function returns
 `null` or an array. `find()` returns an empty array or an array of your model's instances, where the
 original function returns an empty array or a `MongoCursor` object which returns arrays in iterations.
 
@@ -293,6 +293,16 @@ and with the limits. This can be useful for pagination. Look at the example:
     $users = User::getInstance()->find(array('first_name' => 'John'), array(), array('last_name' => -1), 0, 10, $count, $found);
     echo $count;  //This will be the number of all elements with the first name John, maybe 0, 5, 10 or even 100
     echo $found;  //This will be 10 or less because the result set is limited to max 10
+
+The `count()` function is a wrapper around the `MongoCursor` `count()` function, but accepts a query parameter as
+well as a skip and a limit parameter just like the `find()` function. It returns the number of datasets found by
+the query, limited by skip and limit.
+Keep in mind: This is only useful in cases where only the number of datasets matters, in all other cases the
+`$count` and `$found` parameters of the `find()` function will do a better job because no second query is necessary
+to get the datasets. Here is an example for a count only query:
+
+    //Count the users with first name John
+    echo User::getInstance()->count(array('first_name' => 'John'));
 
 You can set some options for the MongoDB connection via the Plah class or a config file. Most of the options
 should be clear, mongodb.db is the database that is used for authentication if user and password are set.

@@ -186,4 +186,39 @@ abstract class MongoModel extends Singleton
 
         return $data;
     }
+
+    /**
+     * Get the number of records.
+     *
+     * @param array $query
+     * @param null|int $skip
+     * @param null|int $limit
+     * @return int
+     */
+    public function count(array $query = array(), $skip = null, $limit = null)
+    {
+        $result = self::getCollection()->find($query);
+
+        if (!is_null($skip)) {
+            $result->skip((int)$skip);
+        }
+        if (!is_null($limit)) {
+            $result->limit((int)$limit);
+        }
+
+        return $result->count(true);
+    }
+
+    /**
+     * Alias for count.
+     *
+     * @param array $query
+     * @param null|int $skip
+     * @param null|int $limit
+     * @return int
+     */
+    public function found(array $query = array(), $skip = null, $limit = null)
+    {
+        return $this->count($query, $skip, $limit);
+    }
 }
