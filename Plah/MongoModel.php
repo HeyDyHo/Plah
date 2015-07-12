@@ -106,6 +106,29 @@ abstract class MongoModel extends Singleton
     }
 
     /**
+     * Get property value.
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function get($key, $default = null)
+    {
+        return property_exists($this, $key) ? $this->$key : $default;
+    }
+
+    /**
+     * Set property value.
+     *
+     * @param string $key
+     * @param mixed $value
+     */
+    public function set($key, $value)
+    {
+        $this->$key = $value;
+    }
+
+    /**
      * Save record.
      *
      * @return bool
