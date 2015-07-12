@@ -13,11 +13,7 @@ class Session extends Singleton
      */
     public function get($key, $default = null)
     {
-        if (isset($_SESSION[$key])) {
-            return $_SESSION[$key];
-        }
-
-        return $default;
+        return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
     }
 
     /**
