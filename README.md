@@ -30,7 +30,7 @@ because the Config class doen't know where to look for the config file without s
 ### Plah
 The Plah class itsself is only a wrapper to initially setup some stuff. It's used like that:
 
-    new \Plah\Plah(array(
+    \Plah\Plah::setConfig(array(
         'config.dir' => __DIR__ . '/../config',
         'config.file.default' => 'config-default',
         'config.file.local' => 'config-local',
@@ -47,6 +47,14 @@ The Plah class itsself is only a wrapper to initially setup some stuff. It's use
         'mongoautoincrement.db' => 'autoincrement',
         'mongoautoincrement.collection' => 'autoincrement'
     ));
+    
+    //Another (old) way
+    new \Plah\Plah(array(
+        'config.dir' => __DIR__ . '/../config'
+    ));
+    
+    //Get a config item
+    echo \Plah\Plah::getConfig('config.dir');
 
 Most of the time you will use this in your projects `index.php` file or some kind of init file/class.
 You don't need to set all possible options, just those for the parts of Plah that you plan to use.
