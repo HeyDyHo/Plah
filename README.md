@@ -249,6 +249,10 @@ Here are some examples of how to use your models:
     $user->last_name = 'Doe';
     $user-save();
     
+    //Another way to set values
+    $user = new User();
+    $user->set('email', 'myaddress@example.com');
+    
     //Find a user with the email myaddress@example.com, change it and save it
     $user = User::getInstance()->findOne(array('email' => 'myaddress@example.com'));
     $user->email = 'mynewaddress@example.com';
@@ -267,6 +271,10 @@ Here are some examples of how to use your models:
     foreach ($users as $user) {
         echo $user->email;
     }
+    
+    //Another way to get values
+    echo $user->get('email');
+    echo $user->get('email', 'unknown');  //Gets 'unknown' as default value if the email property doesn't exist
     
     //Find a user with the email myaddress@example.com and remove it from the collection
     $user = User::getInstance()->findOne(array('email' => 'myaddress@example.com'));
