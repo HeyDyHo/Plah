@@ -11,7 +11,7 @@ class IniParser extends Singleton
      * @param bool $sections
      * @return array
      */
-    public function parse($file, $sections = false)
+    public function get($file, $sections = false)
     {
         $data = array();
 

@@ -4,32 +4,46 @@ namespace Plah;
 
 class Language extends Singleton
 {
+    private static $_config = array(  //Class config
+        'dir' => '../language',
+        'file_default' => 'en'
+    );
     private static $_items = array();  //Language items
 
     private $_language = null;  //Currently selected language
+
+    /**
+     * Set config.
+     *
+     * @param array $config
+     */
+    public static function config(array $config)
+    {
+        self::$_config = array_merge(self::$_config, $config);
+    }
 
     /**
      * Initialize language instance.
      */
     public function __construct()
     {
-        $this->_language = Config::getInstance()->get('language.file.default', Plah::getConfig('language.file.default'));
+        $this->_language = self::$_config['file_default'];
     }
 
     /**
      * Get language item.
      *
-     * @param string $id
+     * @param string $key
      * @param mixed $default
      * @return mixed
      */
-    public function get($id, $default = null)
+    public function get($key, $default = null)
     {
         if (!isset(self::$_items[$this->_language])) {
             $this->_parse($this->_language);
         }
 
-        return isset(self::$_items[$this->_language][$id]) ? self::$_items[$this->_language][$id] : $default;
+        return isset(self::$_items[$this->_language][$key]) ? self::$_items[$this->_language][$key] : $default;
     }
 
     /**
@@ -50,13 +64,13 @@ class Language extends Singleton
     private function _parse($language)
     {
         //Parse default language file
-        $language_default = rtrim(Config::getInstance()->get('language.dir', Plah::getConfig('language.dir')), '/') . '/' . Config::getInstance()->get('language.file.default', Plah::getConfig('language.file.default')) . '.ini';
-        self::$_items[$language] = IniParser::getInstance()->parse($language_default);
+        $language_default = rtrim(self::$_config['dir'], '/') . '/' . self::$_config['file_default'] . '.ini';
+        self::$_items[$language] = IniParser::getInstance()->get($language_default);
 
         //Parse additional language file and update/add keys of default language
-        if ($language != Config::getInstance()->get('language.file.default', Plah::getConfig('language.file.default'))) {
-            $language_additional = rtrim(Config::getInstance()->get('language.dir', Plah::getConfig('language.dir')), '/') . '/' . $language . '.ini';
-            self::$_items[$language] = array_merge(self::$_items[$language], IniParser::getInstance()->parse($language_additional));
+        if ($language != self::$_config['file_default']) {
+            $language_additional = rtrim(self::$_config['dir'], '/') . '/' . $language . '.ini';
+            self::$_items[$language] = array_merge(self::$_items[$language], IniParser::getInstance()->get($language_additional));
         }
     }
 }

@@ -2,7 +2,7 @@
 PHP little app helper (Plah) is a small library with some classes that can be used as addons
 for PHP micro frameworks like the famous [Slim Framework](http://www.slimframework.com/).
 For example it has a Config class that uses text files for configuration options or a Language class
-that can be used for multi-language setups. A MongoModel base class is also present that makes it
+that can be used for multi-language setups. A MongoModel base class is also included that makes it
 easy to use [MongoDB](http://www.mongodb.org/) for your models instead of or in addition to
 [MySQL](https://www.mysql.com/).
 
@@ -11,7 +11,7 @@ Use [Composer](https://getcomposer.org/) to get Plah into your project. This wil
 
     {
         "require": {
-            "heydyho/plah": "~1.0"
+            "heydyho/plah": "~2.0"
         }
     }
 
@@ -22,44 +22,28 @@ some of the classes depend on each other and rely on an autoloader.
 
 ## Usage
 Because Plah is a toolset there is not one single entry point, you can use only parts of it
-or everything. Each part of Plah has it's own configuration options. All of them can be set
-via the Plah class itself or, if you like to use it, via the Config component via a config file.
-Keep in mind: The options for the Config class have to be set via the Plah class, this is necessary
-because the Config class doen't know where to look for the config file without some basic setup.
+or everything. Each part of Plah has it's own configuration options (if necessary). They are
+initialized statically with a `::config()` method that gets an array of config options. For
+example:
 
-### Plah
-The Plah class itsself is only a wrapper to initially setup some stuff. It's used like that:
-
-    \Plah\Plah::setConfig(array(
-        'config.dir' => __DIR__ . '/../config',
-        'config.file.default' => 'config-default',
-        'config.file.local' => 'config-local',
-        'platform.dir' => __DIR__ . '/../platform',
-        'platform.file.default' => 'platform-default',
-        'platform.file.local' => 'platform-local',
-        'language.dir' => __DIR__ . '/../language',
-        'language.file.default' => 'en',
-        'mongodb.host' => 'localhost',
-        'mongodb.port' => '',
-        'mongodb.user' => '',
-        'mongodb.password' => '',
-        'mongodb.db' => '',
-        'mongoautoincrement.db' => 'autoincrement',
-        'mongoautoincrement.collection' => 'autoincrement'
+    \Plah\Config::config(array(
+        'dir' => __DIR__ . '/../myconfig',
+        'file_default' => 'myconfig-default',
+        'file_local' => 'myconfig-local'
     ));
-    
-    //Another (old) way
-    new \Plah\Plah(array(
-        'config.dir' => __DIR__ . '/../config'
-    ));
-    
-    //Get a config item
-    echo \Plah\Plah::getConfig('config.dir');
 
 Most of the time you will use this in your projects `index.php` file or some kind of init file/class.
-You don't need to set all possible options, just those for the parts of Plah that you plan to use.
-As said above, you can put all these options to a config file except the `config.` options that
-are used for the Config component.
+You don't need to set all possible options, just those for the parts of Plah that you plan to use. You
+even don't need to set all options for one part, only those that you want to be different from the
+defaults. For example:
+
+    \Plah\Config::config(array(
+        'dir' => __DIR__ . '/../myconfig'
+    ));
+
+This will change the config directory only and leave the default file names.
+
+## Components
 
 ### Config
 The Config class can be used to put config options to one single text file. The following format
@@ -90,9 +74,11 @@ corresponding settings, the .ini file extension is hard coded and needs to be pr
 
 **Settings:**
 
-    config.dir
-    config.file.default
-    config.file.local
+    \Plah\Config::config(array(
+        'dir' => '../config',
+        'file_default' => 'config-default',
+        'file_local' => 'config-local'
+    ));
 
 ### Platform
 The Platform class can be used as an addition or instead of the Config class. Basically the workflow
@@ -171,9 +157,11 @@ where an option in a platform specific file is missing.
 
 **Settings:**
 
-    platform.dir
-    platform.file.default
-    platform.file.local
+    \Plah\Platform::config(array(
+        'dir' => '../platform',
+        'file_default' => 'platform-default',
+        'file_local' => 'platform-local'
+    ));
 
 ### Language
 The Language class can be used to work with multi-language setups. It works with text files like the
@@ -204,18 +192,20 @@ Config and Platform classes, that's an alternative way to the well-known but som
     $language_de->set('de');
     $language_de->get('main.hello');  //hallo
 
-There is not much magic about it. The option `language.file.default` let's you set a default language file.
+There is not much magic about it. The option `file_default` let's you set a default language file.
 This file is always loaded. So if en is your main language and the de file is missing some texts, the
 texts of the en file will be used.
 You sould select the language in your projects `index.php`  or some kind of init file/class maybe depending
-on the browser language or the URL like in the platform example. Keep in mind: The `language.file.default`
+on the browser language or the URL like in the platform example. Keep in mind: The `file_default`
 option should not be used as your platform default language setting, it's just a basic language file
 that's used for later translations.
 
 **Settings:**
 
-    language.dir
-    language.file.default
+    \Plah\Language::config(array(
+        'dir' => '../language',
+        'file_default' => 'en'
+    ));
 
 ### MongoModel
 The MongoModel class can be used as base for your own models using MongoDB as a storage backend. A basic model
@@ -242,7 +232,7 @@ would look like this:
     }
 
 `$_db` sets the database and `$_collection` the MongoDB collection (table) that is used for storing the data. These
-properties must be set to make the model working. `$_key` can be used to set something like a primary key, usage
+properties must be set to make the model work. `$_key` can be used to set something like a primary key, usage
 can be found in the examples below. The public properties of the model are the fields that are written to the
 collection. The `ensureIndexes()` function defines the necessary indexes for your model. You have to run it when the
 indexes change. Best practice is to have one file that runs the `ensureIndexes()` functions of all your models.
@@ -320,54 +310,60 @@ to get the datasets. Here is an example for a count only query:
     //Count the users with first name John
     echo User::getInstance()->count(array('first_name' => 'John'));
 
-You can set some options for the MongoDB connection via the Plah class or a config file. Most of the options
-should be clear, mongodb.db is the database that is used for authentication if user and password are set.
+You can set some options for the MongoDB connection via the static `config()` method. Most of the options
+should be clear, `auth_db` is the database that is used for authentication if user and password are set.
 
 **Settings:**
 
-    mongodb.host
-    mongodb.port
-    mongodb.user
-    mongodb.password
-    mongodb.db
+    \Plah\MongoModel::config(array(
+        'host' => 'localhost',
+        'port' => '',
+        'user' => '',
+        'password' => '',
+        'auth_db' => ''
+    ));
 
 ### MongoAutoIncrement
 The MongoAutoIncrement class can be used to get auto incremented IDs like SQL databases use them.
-MongoAutoIncrement needs a database and a collection, both default to `autoincrement` and can be changed
-by the Plah init process or via a config file. Internally a document with a specific key is created, every
-time you try to get the next auto incement value for this key a sequence number is incremented by one. Here
-is a short usage example:
+MongoAutoIncrement needs a database and a collection, both default to `autoincrement` and can be changed.
+Internally a document with a specific key is created, every time you try to get the next auto incement
+value for this key a sequence number is incremented by one. Here is a short usage example:
 
-    echo \Plah\MongoAutoIncrement::getInstance()->get('user');  //1
-    echo \Plah\MongoAutoIncrement::getInstance()->get('user');  //2
-    echo \Plah\MongoAutoIncrement::getInstance()->get('user');  //3
+    echo \Plah\MongoAutoIncrement::getInstance()->getNext('user');  //1
+    echo \Plah\MongoAutoIncrement::getInstance()->getNext('user');  //2
+    echo \Plah\MongoAutoIncrement::getInstance()->getNext('user');  //3
     
-    echo \Plah\MongoAutoIncrement::getInstance()->get('event');  //1
-    echo \Plah\MongoAutoIncrement::getInstance()->get('event');  //2
-    echo \Plah\MongoAutoIncrement::getInstance()->get('user');  //4
-    echo \Plah\MongoAutoIncrement::getInstance()->get('event');  //3
+    echo \Plah\MongoAutoIncrement::getInstance()->getNext('event');  //1
+    echo \Plah\MongoAutoIncrement::getInstance()->getNext('event');  //2
+    echo \Plah\MongoAutoIncrement::getInstance()->getNext('user');  //4
+    echo \Plah\MongoAutoIncrement::getInstance()->getNext('event');  //3
     
     //Another way
     $auto_increment = new \Plah\MongoAutoIncrement();
-    echo $auto_increment->get('user');  //5
-    echo $auto_increment->get('event');  //4
+    echo $auto_increment->getNext('user');  //5
+    echo $auto_increment->getNext('event');  //4
 
 Optionally you can set an init value, to start the counter with this value in case this is the first request
 for the key:
 
-    echo \Plah\MongoAutoIncrement::getInstance()->get('user', 1000);  //1000
+    echo \Plah\MongoAutoIncrement::getInstance()->getNext('user', 1000);  //1000
     
-    echo \Plah\MongoAutoIncrement::getInstance()->get('event');  //1
-    echo \Plah\MongoAutoIncrement::getInstance()->get('event', 1000);  //2 <- Not the first request for 'event', the init value is ignored
+    echo \Plah\MongoAutoIncrement::getInstance()->getNext('event');  //1
+    echo \Plah\MongoAutoIncrement::getInstance()->getNext('event', 1000);  //2 <- Not the first request for 'event', the init value is ignored
 
 You should run the following line one time to create the necessary indexes for the collection.
 
     \Plah\MongoAutoIncrement::ensureIndexes();
 
+The MongoAutoIncrement class extends the MongoModel class, so make sure you configure MongoModel properly
+before you use MongoAutoIncrement.
+
 **Settings:**
 
-    mongoautoincrement.db
-    mongoautoincrement.collection
+    \Plah\MongoAutoIncrement::config(array(
+        'db' => 'autoincrement',
+        'collection' => 'autoincrement'
+    ));
 
 ### Session
 The Session class is a wrapper around the `$_SESSION` super global variable. You can use it to get, set
@@ -458,11 +454,12 @@ Keep in mind: This is only useful for classes with no special settings that need
 
 ### IniParser
 The IniParser class is used by the Config, Platform and Language classes. It parses a text file in the format
-key=value and gives back an associative array. If this is what you need for your project you can use the IniParser
-like this:
+key = "value" and gives back an associative array. It's mainly based on the PHP function `parse_ini_file()`,
+except that it always returns an array, even if the file could not be parsed. If this is what you need for your
+project you can use the IniParser like this:
 
-    $myoptions = \Plah\IniParser::getInstance()->parse('myfile.ini');
+    $myoptions = \Plah\IniParser::getInstance()->get('myfile.ini');
     
     //Another way
     $parser = new \Plah\IniParser();
-    $myoptions = $parser->parse('myfile.ini');
+    $myoptions = $parser->get('myfile.ini');

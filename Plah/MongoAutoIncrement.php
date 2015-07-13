@@ -4,6 +4,11 @@ namespace Plah;
 
 class MongoAutoIncrement extends MongoModel
 {
+    private static $_config = array(  //Class config
+        'db' => 'autoincrement',
+        'collection' => 'autoincrement'
+    );
+
     //Basic database settings
     protected static $_db = null;
     protected static $_collection = null;
@@ -15,12 +20,13 @@ class MongoAutoIncrement extends MongoModel
     public $value = 0;
 
     /**
-     * Indexes.
+     * Set config.
+     *
+     * @param array $config
      */
-    public static function ensureIndexes()
+    public static function config(array $config)
     {
-        self::_setDbCollection();
-        self::getCollection()->ensureIndex(array('key' => 1), array('background' => true, 'unique' => true));
+        self::$_config = array_merge(self::$_config, $config);
     }
 
     /**
@@ -28,8 +34,17 @@ class MongoAutoIncrement extends MongoModel
      */
     private static function _setDbCollection()
     {
-        self::$_db = Config::getInstance()->get('mongoautoincrement.db', Plah::getConfig('mongoautoincrement.db'));
-        self::$_collection = Config::getInstance()->get('mongoautoincrement.collection', Plah::getConfig('mongoautoincrement.collection'));
+        self::$_db = self::$_config['db'];
+        self::$_collection = self::$_config['collection'];
+    }
+
+    /**
+     * Indexes.
+     */
+    public static function ensureIndexes()
+    {
+        self::_setDbCollection();
+        self::getCollection()->ensureIndex(array('key' => 1), array('background' => true, 'unique' => true));
     }
 
     /**
@@ -51,7 +66,7 @@ class MongoAutoIncrement extends MongoModel
      * @param int $init_value
      * @return int
      */
-    public function get($key, $init_value = 1)
+    public function getNext($key, $init_value = 1)
     {
         $auto_increment = self::getCollection()->findAndModify(array('key' => $key), array('$inc' => array('value' => 1)), array('value' => true), array('new' => true));
 

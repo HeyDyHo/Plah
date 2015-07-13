@@ -4,6 +4,13 @@ namespace Plah;
 
 abstract class MongoModel extends Singleton
 {
+    private static $_config = array(  //Class config
+        'host' => 'localhost',
+        'port' => '',
+        'user' => '',
+        'password' => '',
+        'auth_db' => ''
+    );
     private static $_client = null;  //Mongo client instance, one for all
     private static $_dbs = array();  //Mondo db instances, one per db
     private static $_collections = array();  //Mongo collection instances, one per collection
@@ -11,6 +18,16 @@ abstract class MongoModel extends Singleton
     protected static $_db = null;  //Database for the model
     protected static $_collection = null;  //Collection for the model
     protected static $_key = null;  //Primary key for the model, used for quick finding one record
+
+    /**
+     * Set config.
+     *
+     * @param array $config
+     */
+    public static function config(array $config)
+    {
+        self::$_config = array_merge(self::$_config, $config);
+    }
 
     /**
      * Get a Mongo client.
@@ -22,18 +39,18 @@ abstract class MongoModel extends Singleton
         if (is_null(self::$_client)) {
             $mongodb_string = 'mongodb://';
 
-            if (!empty(Config::getInstance()->get('mongodb.user', Plah::getConfig('mongodb.user'))) && !empty(Config::getInstance()->get('mongodb.password', Plah::getConfig('mongodb.password')))) {
-                $mongodb_string .= Config::getInstance()->get('mongodb.user', Plah::getConfig('mongodb.user')) . ':' . Config::getInstance()->get('mongodb.password', Plah::getConfig('mongodb.password')) . '@';
+            if (!empty(self::$_config['user']) && !empty(self::$_config['password'])) {
+                $mongodb_string .= self::$_config['user'] . ':' . self::$_config['password'] . '@';
             }
 
-            $mongodb_string .= Config::getInstance()->get('mongodb.host', Plah::getConfig('mongodb.host'));
+            $mongodb_string .= self::$_config['host'];
 
-            if (!empty(Config::getInstance()->get('mongodb.port', Plah::getConfig('mongodb.port')))) {
-                $mongodb_string .= ':' . Config::getInstance()->get('mongodb.port', Plah::getConfig('mongodb.port'));
+            if (!empty(self::$_config['port'])) {
+                $mongodb_string .= ':' . self::$_config['port'];
             }
 
-            if (!empty(Config::getInstance()->get('mongodb.db', Plah::getConfig('mongodb.db')))) {
-                $mongodb_string .= '/' . Config::getInstance()->get('mongodb.db', Plah::getConfig('mongodb.db'));
+            if (!empty(self::$_config['auth_db'])) {
+                $mongodb_string .= '/' . self::$_config['auth_db'];
             }
 
             self::$_client = new \MongoClient($mongodb_string);
