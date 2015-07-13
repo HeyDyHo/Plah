@@ -23,7 +23,7 @@ some of the classes depend on each other and rely on an autoloader.
 ## Usage
 Because Plah is a toolset there is not one single entry point, you can use only parts of it
 or everything. Each part of Plah has it's own configuration options (if necessary). They are
-initialized statically with a `::config()` method that gets an array of config options. For
+initialized statically with a `::config()` function that gets an array of config options. For
 example:
 
     \Plah\Config::config(array(
@@ -310,7 +310,7 @@ to get the datasets. Here is an example for a count only query:
     //Count the users with first name John
     echo User::getInstance()->count(array('first_name' => 'John'));
 
-You can set some options for the MongoDB connection via the static `config()` method. Most of the options
+You can set some options for the MongoDB connection via the static `config()` function. Most of the options
 should be clear, `auth_db` is the database that is used for authentication if user and password are set.
 
 **Settings:**
@@ -363,6 +363,56 @@ before you use MongoAutoIncrement.
     \Plah\MongoAutoIncrement::config(array(
         'db' => 'autoincrement',
         'collection' => 'autoincrement'
+    ));
+
+### MongoSession
+The MongoSession class can be used for a MongoDB based session management. The class doen't use or rely
+on PHP sessions in any way, nevertheless it uses the same workflow. First a session must be startet. If
+the visitor of a page already has a valid session ID the corresponding data is loaded from a MongoDB
+collection, else a new Session ID is generated. To "remember" the visitor's session ID cookies are used.
+A new session is not automatically written to the database to prevent flooding the database with empty
+sessions (for example in the case of a DDoS attack). The session is saved when the first value is set and
+each time a new value is set via the `set()` function. The database and collection for the sessions can be
+set via config options as well as the cookie name and expire time. The expire time can be 0 (which means
+the cookie ends when the browser is closed), a unix timestamp or a string like '1 day'. Here is a usage
+example:
+
+    //Configure the sessions to be valid for 1 day
+    \Plah\MongoSession::config(array(
+        'expires' => '1 day'
+    ));
+    
+    //Start the session
+    \Plah\MongoSession::getInstance()->start();
+    
+    //Set a session value
+    \Plah\MongoSession::getInstance()->set('test', 'testvalue');
+    
+    //Get a session value
+    echo \Plah\MongoSession::getInstance()->get('test');  //shows testvalue
+    
+    //Get a session value with a default fallback value
+    echo \Plah\MongoSession::getInstance()->get('test2', 'testvalue2');  //shows testvalue2 because no other value was set for test2
+    
+    //Another way
+    //This is not recommended because you have to make the $session variable globally available or call start() every time you create a new instance of the MongoSession class
+    $session = new \Plah\MongoSession();
+    $session->start();
+    $session->set('test', 'testvalue');
+    echo $session->get('test');
+
+The MongoSession class extends the MongoModel class, so make sure you configure MongoModel properly
+before you use MongoSession. The `set()` function of the MongoModel class is overwritten and modified
+to save the object to the database each time a property is changed. This is to keep session data
+consistent even if a request cannot be completely processed.
+
+**Settings:**
+
+    \Plah\MongoSession::config(array(
+        'db' => 'session',
+        'collection' => 'session',
+        'name' => 'session',
+        'expires' => 0
     ));
 
 ### Session
