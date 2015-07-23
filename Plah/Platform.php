@@ -48,6 +48,20 @@ class Platform extends Singleton
     }
 
     /**
+     * Get all platform items.
+     *
+     * @return array
+     */
+    public function getAll()
+    {
+        if (!isset(self::$_items[$this->_platform])) {
+            $this->_parse($this->_platform);
+        }
+
+        return self::$_items[$this->_platform];
+    }
+
+    /**
      * Set selected platform.
      *
      * @param string $platform

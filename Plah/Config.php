@@ -38,6 +38,20 @@ class Config extends Singleton
     }
 
     /**
+     * Get all config items.
+     *
+     * @return array
+     */
+    public function getAll()
+    {
+        if (empty(self::$_items)) {
+            $this->_parse();
+        }
+
+        return self::$_items;
+    }
+
+    /**
      * Parse config files.
      */
     private function _parse()

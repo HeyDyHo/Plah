@@ -47,6 +47,20 @@ class Language extends Singleton
     }
 
     /**
+     * Get all language items.
+     *
+     * @return array
+     */
+    public function getAll()
+    {
+        if (!isset(self::$_items[$this->_language])) {
+            $this->_parse($this->_language);
+        }
+
+        return self::$_items[$this->_language];
+    }
+
+    /**
      * Set selected language.
      *
      * @param string $language

@@ -44,7 +44,6 @@ defaults. For example:
 This will change the config directory only and leave the default file names.
 
 ## Components
-
 ### Config
 The Config class can be used to put config options to one single text file. The following format
 is used for a config file:
@@ -64,6 +63,10 @@ And this is the way how to get a config option:
     //Another way
     $config = new \Plah\Config();
     $config->get('mail.host');
+    
+    //Get all config items as array
+    $config = \Plah\Config::getInstance()->getAll();
+    echo $config['mail.host'];
 
 There are two files, a default config and a local config. Options in the local config file overwrite
 options in the default config file. This feature can be used to have special options in your development
@@ -112,6 +115,10 @@ The code would look something like this:
     $platform = new \Plah\Platform();
     $platform->set($hostname);
     $platform->get('language');
+    
+    //Get all platform items as array
+    $platform = \Plah\Platform::getInstance()->getAll();
+    echo $platform['language'];
 
 This loads the `platform-default.ini` file, additionaly the `platform-local.ini` file if present and the
 `.ini` file that fits to the hostname (the .ini extension must not be present in $hostname, it's added automatically).
@@ -191,6 +198,10 @@ Config and Platform classes, that's an alternative way to the well-known but som
     $language_de = new \Plah\Language();
     $language_de->set('de');
     $language_de->get('main.hello');  //hallo
+    
+    //Get all language items as array
+    $language = \Plah\Language::getInstance()->getAll();
+    echo $language['main.hello'];
 
 There is not much magic about it. The option `file_default` let's you set a default language file.
 This file is always loaded. So if en is your main language and the de file is missing some texts, the
