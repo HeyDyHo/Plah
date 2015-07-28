@@ -1,5 +1,4 @@
 <?php
-
 namespace Plah;
 
 class Language extends Singleton

@@ -1,5 +1,4 @@
 <?php
-
 namespace Plah;
 
 class Pagination extends Singleton

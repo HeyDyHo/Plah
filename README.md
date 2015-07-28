@@ -377,7 +377,7 @@ before you use MongoAutoIncrement.
     ));
 
 ### MongoSession
-The MongoSession class can be used for a MongoDB based session management. The class doen't use or rely
+The MongoSession class can be used for a MongoDB based session management. The class doesn't use or rely
 on PHP sessions in any way, nevertheless it uses the same workflow. First a session must be startet. If
 the visitor of a page already has a valid session ID the corresponding data is loaded from a MongoDB
 collection, else a new Session ID is generated. To "remember" the visitor's session ID cookies are used.

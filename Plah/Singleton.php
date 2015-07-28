@@ -1,5 +1,4 @@
 <?php
-
 namespace Plah;
 
 abstract class Singleton

@@ -1,5 +1,4 @@
 <?php
-
 namespace Plah;
 
 abstract class MongoModel extends Singleton
@@ -119,6 +118,20 @@ abstract class MongoModel extends Singleton
     {
         foreach ($data as $key => $value) {
             $this->$key = $value;
+        }
+    }
+
+    /**
+     * Safe merge array data to existing properties.
+     *
+     * @param array $data
+     */
+    public function mergePropertiesSafe(array $data)
+    {
+        foreach ($data as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
         }
     }
 

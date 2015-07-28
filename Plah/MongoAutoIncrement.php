@@ -1,5 +1,4 @@
 <?php
-
 namespace Plah;
 
 class MongoAutoIncrement extends MongoModel

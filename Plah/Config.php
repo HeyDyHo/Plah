@@ -1,5 +1,4 @@
 <?php
-
 namespace Plah;
 
 class Config extends Singleton
