@@ -16,7 +16,13 @@ abstract class Singleton
 
         if (!isset(self::$_instances[$class])) {
             $rc = new \ReflectionClass($class);
-            self::$_instances[$class] = $rc->newInstanceArgs(func_get_args());
+            $args = func_get_args();
+
+            if (empty($args)) {
+                self::$_instances[$class] = $rc->newInstance();
+            } else {
+                self::$_instances[$class] = $rc->newInstanceArgs($args);
+            }
         }
 
         return self::$_instances[$class];
