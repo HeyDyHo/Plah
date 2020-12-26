@@ -6,12 +6,18 @@ that can be used for multi-language setups. A MongoModel base class is also incl
 easy to use [MongoDB](http://www.mongodb.org/) for your models instead of or in addition to
 [MySQL](https://www.mysql.com/).
 
+## Version 3
+Version 3 was created for PHP7+. PHP5 users should stick to Version 2.  
+There are some breaking changes, especially for the MongoDB helpers. Because the old PHP mongo extension
+was retired, Plah now uses the PHP mongodb extension and library. Nevertheless, functions like
+`save()` have been kept and work like in Version 2.
+
 ## Installation
 Use [Composer](https://getcomposer.org/) to get Plah into your project. This will make autoloading easy.
 
     {
         "require": {
-            "heydyho/plah": "~2.0"
+            "heydyho/plah": "~3.0"
         }
     }
 
@@ -22,7 +28,7 @@ some of the classes depend on each other and rely on an autoloader.
 
 ## Usage
 Because Plah is a toolset there is not one single entry point, you can use only parts of it
-or everything. Each part of Plah has it's own configuration options (if necessary). They are
+or everything. Each part of Plah has its own configuration options (if necessary). They are
 initialized statically with a `::config()` function that gets an array of config options. For
 example:
 
@@ -236,17 +242,17 @@ would look like this:
         public $first_name = '';
         public $last_name = '';
 
-        public static function ensureIndexes()
+        public static function createIndexes()
         {
-            self::getCollection()->ensureIndex(array('email' => 1), array('background' => true));
+            self::getCollection()->createIndex(array('email' => 1), array('background' => true));
         }
     }
 
 `$_db` sets the database and `$_collection` the MongoDB collection (table) that is used for storing the data. These
 properties must be set to make the model work. `$_key` can be used to set something like a primary key, usage
 can be found in the examples below. The public properties of the model are the fields that are written to the
-collection. The `ensureIndexes()` function defines the necessary indexes for your model. You have to run it when the
-indexes change. Best practice is to have one file that runs the `ensureIndexes()` functions of all your models.
+collection. The `createIndexes()` function defines the necessary indexes for your model. You have to run it when the
+indexes change. Best practice is to have one file that runs the `createIndexes()` functions of all your models.
 
 Here are some examples of how to use your models:
 
@@ -269,7 +275,7 @@ Here are some examples of how to use your models:
     
     //Find a user by the primary key (which is a MongoId in this case), change it and save it
     try {
-        $user = new User(new MongoId('555ef27165689edd457b23c7'));
+        $user = new User(new MongoDB\BSON\ObjectId('555ef27165689edd457b23c7'));
         $user->first_name = 'Jane';
         $user-save();
     } catch (\Exception $e) {
@@ -292,11 +298,11 @@ Here are some examples of how to use your models:
     //Get a PHP MongoCollection object to use all possible functions
     $user_collection = User::getCollection();
 
-The functions `findOne()`, `find()`, `save()` and `remove()` are wrappers around the functions with the same
-names provided by a `MongoCollection` object. `findOne()` returns `null` if nothing was found just like the
+The functions `findOne()`, `find()`, `save()` and `remove()` are wrappers around the functions provided by a
+`MongoDB\Collection` object. `findOne()` returns `null` if nothing was found just like the
 original function and an instance of your model's class if something was found. The original function returns
 `null` or an array. `find()` returns an empty array or an array of your model's instances, where the
-original function returns an empty array or a `MongoCursor` object which returns arrays in iterations.
+original function returns an empty array or a `MongoDB\Driver\Cursor` object which returns arrays in iterations.
 
 The `find()` function has some additional parameters for sorting and limiting the results. Here is an example:
 
@@ -311,7 +317,7 @@ and with the limits. This can be useful for pagination. Look at the example:
     echo $count;  //This will be the number of all elements with the first name John, maybe 0, 5, 10 or even 100
     echo $found;  //This will be 10 or less because the result set is limited to max 10
 
-The `count()` function is a wrapper around the `MongoCursor` `count()` function, but accepts a query parameter as
+The `count()` function is a wrapper around the `MongoDB\Collection` `count()` function, but accepts a query parameter as
 well as a skip and a limit parameter just like the `find()` function. It returns the number of datasets found by
 the query, limited by skip and limit.
 Keep in mind: This is only useful in cases where only the number of datasets matters, in all other cases the
@@ -364,7 +370,7 @@ for the key:
 
 You should run the following line one time to create the necessary indexes for the collection.
 
-    \Plah\MongoAutoIncrement::ensureIndexes();
+    \Plah\MongoAutoIncrement::createIndexes();
 
 The MongoAutoIncrement class extends the MongoModel class, so make sure you configure MongoModel properly
 before you use MongoAutoIncrement.

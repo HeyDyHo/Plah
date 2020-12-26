@@ -31,7 +31,7 @@ abstract class MongoModel extends Singleton
     /**
      * Get a Mongo client.
      *
-     * @return \MongoClient
+     * @return \MongoDB\Client
      */
     public static function getClient()
     {
@@ -52,7 +52,7 @@ abstract class MongoModel extends Singleton
                 $mongodb_string .= '/' . self::$_config['auth_db'];
             }
 
-            self::$_client = new \MongoClient($mongodb_string);
+            self::$_client = new \MongoDB\Client($mongodb_string);
         }
 
         return self::$_client;
@@ -61,12 +61,12 @@ abstract class MongoModel extends Singleton
     /**
      * Get a Mongo database.
      *
-     * @return \MongoDB
+     * @return \MongoDB\Database
      */
     public static function getDb()
     {
         if (!isset(self::$_dbs[static::$_db])) {
-            self::$_dbs[static::$_db] = self::getClient()->selectDB(static::$_db);
+            self::$_dbs[static::$_db] = self::getClient()->selectDatabase(static::$_db);
         }
 
         return self::$_dbs[static::$_db];
@@ -75,14 +75,14 @@ abstract class MongoModel extends Singleton
     /**
      * Get a Mongo collection.
      *
-     * @return \MongoCollection
+     * @return \MongoDB\Collection
      */
     public static function getCollection()
     {
         $collection_name = static::$_db . '_' . static::$_collection;
 
         if (!isset(self::$_collections[$collection_name])) {
-            self::$_collections[$collection_name] = self::getClient()->selectCollection(static::$_db, static::$_collection);
+            self::$_collections[$collection_name] = self::getClient()->selectDatabase(static::$_db)->selectCollection(static::$_collection);
         }
 
         return self::$_collections[$collection_name];
@@ -99,7 +99,7 @@ abstract class MongoModel extends Singleton
         unset($this->_id);
 
         if (!is_null($value) && !is_null(static::$_key)) {
-            $data = self::getCollection()->findOne(array(static::$_key => $value));
+            $data = self::getCollection()->findOne(array(static::$_key => $value), array('typeMap' => array('array' => 'array', 'document' => 'array', 'root' => 'array')));
 
             if (!is_null($data)) {
                 $this->mergeProperties($data);
@@ -165,7 +165,16 @@ abstract class MongoModel extends Singleton
      */
     public function save()
     {
-        return self::getCollection()->save($this);
+        $result = null;
+
+        if (property_exists($this, '_id') && isset($this->_id) && !is_null($this->_id)) {
+            $result = self::getCollection()->replaceOne(array('_id' => $this->_id), $this);
+        } else {
+            $result = self::getCollection()->insertOne($this);
+            $this->_id = $result->getInsertedId();
+        }
+
+        return !!$result;
     }
 
     /**
@@ -175,7 +184,9 @@ abstract class MongoModel extends Singleton
      */
     public function remove()
     {
-        return self::getCollection()->remove(get_object_vars($this));
+        $result = self::getCollection()->deleteOne(get_object_vars($this));
+
+        return !!$result;
     }
 
     /**
@@ -194,26 +205,37 @@ abstract class MongoModel extends Singleton
     {
         $data = array();
 
-        $result = self::getCollection()->find($query, $fields);
+        $options = array();
 
+        if (!empty($fields)) {
+            $options['projection'] = $fields;
+        }
         if (!empty($sort)) {
-            $result->sort($sort);
+            $options['sort'] = $sort;
         }
         if (!is_null($skip)) {
-            $result->skip((int)$skip);
+            $options['skip'] = (int)$skip;
         }
         if (!is_null($limit)) {
-            $result->limit((int)$limit);
+            $options['limit'] = (int)$limit;
         }
 
-        $count = $result->count();
-        $found = $result->count(true);
+        $options['typeMap'] = array(
+            'array' => 'array',
+            'document' => 'array',
+            'root' => 'array'
+        );
+
+        $result = self::getCollection()->find($query, $options);
 
         foreach ($result as $rec) {
             $doc = new static();
             $doc->mergeProperties($rec);
             $data[] = $doc;
         }
+
+        $count = self::getCollection()->count($query);
+        $found = count($data);
 
         return $data;
     }
@@ -230,7 +252,19 @@ abstract class MongoModel extends Singleton
     {
         $data = null;
 
-        $rec = self::getCollection()->findOne($query, $fields);
+        if (!empty($fields) && !isset($options['projection'])) {
+            $options['projection'] = $fields;
+        }
+
+        if (!isset($options['typeMap'])) {
+            $options['typeMap'] = array(
+                'array' => 'array',
+                'document' => 'array',
+                'root' => 'array'
+            );
+        }
+
+        $rec = self::getCollection()->findOne($query, $options);
 
         if (!is_null($rec)) {
             $data = new static();
@@ -250,16 +284,16 @@ abstract class MongoModel extends Singleton
      */
     public function count(array $query = array(), $skip = null, $limit = null)
     {
-        $result = self::getCollection()->find($query);
+        $options = array();
 
         if (!is_null($skip)) {
-            $result->skip((int)$skip);
+            $options['skip'] = (int)$skip;
         }
         if (!is_null($limit)) {
-            $result->limit((int)$limit);
+            $options['limit'] = (int)$limit;
         }
 
-        return $result->count(true);
+        return self::getCollection()->count($query, $options);
     }
 
     /**

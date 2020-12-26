@@ -41,10 +41,10 @@ class MongoSession extends MongoModel
     /**
      * Indexes.
      */
-    public static function ensureIndexes()
+    public static function createIndexes()
     {
         self::_setDbCollection();
-        self::getCollection()->ensureIndex(array('id' => 1), array('background' => true, 'unique' => true));
+        self::getCollection()->createIndex(array('id' => 1), array('background' => true, 'unique' => true));
     }
 
     /**
@@ -78,7 +78,7 @@ class MongoSession extends MongoModel
 
         //Load session data if cookie exists or create a new session if no existing session data was found
         if (isset($_COOKIE[self::$_config['name']])) {
-            $rec = self::getCollection()->findOne(array('id' => $_COOKIE[self::$_config['name']]));
+            $rec = self::getCollection()->findOne(array('id' => $_COOKIE[self::$_config['name']]), array('typeMap' => array('array' => 'array', 'document' => 'array', 'root' => 'array')));
             if (!is_null($rec)) {
                 //Merge session values from record to current session
                 $this->mergeProperties($rec);

@@ -40,10 +40,10 @@ class MongoAutoIncrement extends MongoModel
     /**
      * Indexes.
      */
-    public static function ensureIndexes()
+    public static function createIndexes()
     {
         self::_setDbCollection();
-        self::getCollection()->ensureIndex(array('key' => 1), array('background' => true, 'unique' => true));
+        self::getCollection()->createIndex(array('key' => 1), array('background' => true, 'unique' => true));
     }
 
     /**
@@ -67,7 +67,7 @@ class MongoAutoIncrement extends MongoModel
      */
     public function getNext($key, $init_value = 1)
     {
-        $auto_increment = self::getCollection()->findAndModify(array('key' => $key), array('$inc' => array('value' => 1)), array('value' => true), array('new' => true));
+        $auto_increment = self::getCollection()->findOneAndUpdate(array('key' => $key), array('$inc' => array('value' => 1)), array('projection' => array('value' => true), 'returnDocument' => \MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER, 'typeMap' => array('array' => 'array', 'document' => 'array', 'root' => 'array')));
 
         if (!empty($auto_increment)) {
             return (int)$auto_increment['value'];
